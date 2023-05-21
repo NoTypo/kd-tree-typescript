@@ -13,7 +13,7 @@ class TreeNode<T> {
         this.parent = parent;
         this.dimension = dimension;
     }
-    
+
 }
 
 class kdTree<T> {
@@ -48,4 +48,35 @@ class kdTree<T> {
         return node;
     }
 
+    public insert(point: T): void {
+        const newNode = new TreeNode(point, 0, null);
+        if (!this.root) {
+            this.root = newNode;
+        } else {
+            this.innerInsert(this.root, newNode, 0);
+        }
+    }
+
+    private innerInsert(currentNode: TreeNode<T>, newNode: TreeNode<T>, depth: number): void {
+        const dim = depth % this.dimenstions.length;
+
+        if (newNode.obj[this.dimenstions[dim]] < currentNode.obj[this.dimenstions[dim]]) {
+            if (!currentNode.left) {
+                newNode.dimension = dim;
+                newNode.parent = currentNode;
+                currentNode.left = newNode;
+            } else {
+                this.innerInsert(currentNode.left, newNode, depth + 1);
+            }
+        } else {
+            if (!currentNode.right) {
+                newNode.dimension = dim;
+                newNode.parent = currentNode;
+                currentNode.right = newNode;
+            } else {
+                this.innerInsert(currentNode.right, newNode, depth + 1);
+            }
+        }
+    }
+    
 }
