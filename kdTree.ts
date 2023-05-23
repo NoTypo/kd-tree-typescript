@@ -79,6 +79,61 @@ class kdTree<T> {
         }
     }
 
+    public remove(value: T): void {
+        const nodeToRemove = this.searchDown(this.root, value);
+        if (nodeToRemove) {
+            this.removeNode(nodeToRemove);
+        }
+    }
+
+    private removeNode(node: TreeNode<T>): void {
+        if (node === this.root) {
+            this.root = null;
+            return;
+        }
+
+        if (node.parent) {
+            if (node.parent.left === node) {
+                node.parent.left = null;
+            } else if (node.parent.right === node) {
+                node.parent.right = null;
+            }
+        }
+
+        this.innerRemove(node);
+    }
+
+    private innerRemove(node: TreeNode<T> | null): void {
+        if (!node) {
+            return;
+        }
+
+        if (node.left && node.right) {
+            const successor = this.findMin(node.right, node.dimension);
+            node.obj = successor.obj;
+            this.innerRemove(successor);
+        } else {
+            const child = node.left || node.right;
+            if (node.parent) {
+                if (node.parent.left === node) {
+                    node.parent.left = child;
+                } else if (node.parent.right === node) {
+                    node.parent.right = child;
+                }
+            }
+            if (child) {
+                child.parent = node.parent;
+            }
+        }
+    }
+
+    private findMin(currentNode: TreeNode<T>, dimension: number): TreeNode<T> {
+        while (currentNode.left) {
+            currentNode = currentNode.left;
+        }
+        return currentNode;
+    }
+
     private searchDown(currentNode: TreeNode<T> | null, value: T): TreeNode<T> | null {
         if (!currentNode) {
             return null;
@@ -94,3 +149,5 @@ class kdTree<T> {
     }
 
 }
+
+export { kdTree, TreeNode }
