@@ -148,6 +148,27 @@ class kdTree<T> {
         return this.searchDown(nextNode, value);
     }
 
+    public search(point: T): boolean {
+        return this.innerSearch(this.root, point, 0);
+    }
+
+    private innerSearch(currentNode: TreeNode<T> | null, point: T, depth: number): boolean {
+        if (!currentNode) {
+            return false;
+        }
+
+        if (this.metric(currentNode.obj, point) === 0) {
+            return true;
+        }
+
+        const dim = depth % this.dimenstions.length;
+        const nextNode = point[this.dimenstions[dim]] < currentNode.obj[this.dimenstions[dim]]
+            ? currentNode.left
+            : currentNode.right;
+
+        return this.innerSearch(nextNode, point, depth + 1);
+    }
+
 }
 
 export { kdTree, TreeNode }
