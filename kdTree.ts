@@ -78,5 +78,19 @@ class kdTree<T> {
             }
         }
     }
-    
+
+    private searchDown(currentNode: TreeNode<T> | null, value: T): TreeNode<T> | null {
+        if (!currentNode) {
+            return null;
+        }
+
+        if (currentNode.obj === value) {
+            return currentNode;
+        }
+
+        const dim = currentNode.dimension;
+        const nextNode = value < currentNode.obj[dim] ? currentNode.left : currentNode.right;
+        return this.searchDown(nextNode, value);
+    }
+
 }
