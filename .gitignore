@@ -1,0 +1,24 @@
+# Node modules
+node_modules/
+
+# TypeScript build output
+dist/
+test-dist/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage
+
+# System Files
+.DS_Store
+Thumbs.db

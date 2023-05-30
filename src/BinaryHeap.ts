@@ -37,6 +37,10 @@ class BinaryHeap<T> {
         return this.content.length;
     }
 
+    public isEmpty(): boolean {
+        return this.content.length === 0;
+    }
+
     public remove(element: T) {
         const length = this.content.length;
         for (let i = 0; i < length; i++) {
@@ -107,3 +111,5 @@ class BinaryHeap<T> {
     }
 
 }
+
+export { BinaryHeap }

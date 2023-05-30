@@ -1,0 +1,29 @@
+{
+  "name": "data-structures-web",
+  "version": "1.0.0",
+  "description": "A set of common data structures useful for web apps.",
+  "main": "index.ts",
+  "scripts": {
+    "test": "node ./test-dist/test/tests_kdTree.js",
+    "pretest": "npm run test:build",
+    "build": "tsc -p ./src/tsconfig.json",
+    "test:build": "tsc -p ./test/tsconfig.json",
+    "start": "node ./dist/kdTree.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pathaksubrat/data-structures-web.git"
+  },
+  "keywords": [
+    "kdtree"
+  ],
+  "author": "Subrat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pathaksubrat/data-structures-web/issues"
+  },
+  "homepage": "https://github.com/pathaksubrat/data-structures-web#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
