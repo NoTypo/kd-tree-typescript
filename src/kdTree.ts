@@ -23,7 +23,7 @@ type Dimensional = {
 }
 
 type NodeDistance<T> = {
-    node: TreeNode<T>,
+    node: TreeNode<T> | null,
     distance: number
 }
 
@@ -121,8 +121,12 @@ class kdTree<T extends Dimensional> {
 
         if (node.left && node.right) {
             const successor = this.findMin(node.right, node.dimension);
-            node.obj = successor.obj;
-            this.innerRemove(successor);
+            if (successor) {
+                node.obj = successor.obj;
+                this.innerRemove(successor);
+            } else {
+                throw new Error("Should never reach here: successor cannot be null if right child exists.");
+            }
         } else {
             const child = node.left || node.right;
             if (node.parent) {
@@ -138,11 +142,42 @@ class kdTree<T extends Dimensional> {
         }
     }
 
-    private findMin(currentNode: TreeNode<T>, dimension: number): TreeNode<T> {
-        while (currentNode.left) {
-            currentNode = currentNode.left;
+    private findMin(node: TreeNode<T> | null, dimension: number): TreeNode<T> | null {
+        if (node === null) {
+            return null;
         }
-        return currentNode;
+
+        const dim = node.dimension;
+
+        if (dim === dimension) {
+            if (node.left !== null) {
+                return this.findMin(node.left, dimension);
+            }
+        }
+
+        let min = node;
+        let leftMin = this.findMin(node.left, dimension);
+        let rightMin = this.findMin(node.right, dimension);
+
+        if (leftMin !== null && leftMin.obj[this.dimensions[dimension]] < min.obj[this.dimensions[dimension]]) {
+            min = leftMin;
+        }
+        if (rightMin !== null && rightMin.obj[this.dimensions[dimension]] < min.obj[this.dimensions[dimension]]) {
+            min = rightMin;
+        }
+
+        return min;
+    }
+
+    private minNode(x: TreeNode<T>, y: TreeNode<T> | null, z: TreeNode<T> | null, dimension: number): TreeNode<T> {
+        let min = x;
+        if (y !== null && y.obj[this.dimensions[dimension]] < min.obj[this.dimensions[dimension]]) {
+            min = y;
+        }
+        if (z !== null && z.obj[this.dimensions[dimension]] < min.obj[this.dimensions[dimension]]) {
+            min = z;
+        }
+        return min;
     }
 
     private findNodeByValue(currentNode: TreeNode<T> | null, value: T): TreeNode<T> | null {
@@ -180,63 +215,66 @@ class kdTree<T extends Dimensional> {
         return this.innerSearch(nextNode, point, depth + 1);
     }
 
-    public nearestN(point: T, N: number): T[] {
-        const nearestN: T[] = [];
-        const distances = new BinaryHeap<NodeDistance<T>>(
-            (item: NodeDistance<T>) => item.distance
+    public nearest(point: T, N: number): [T, number][] {
+        const nearestN: [T, number][] = [];
+        const distances = new BinaryHeap<[TreeNode<T>, number]>(
+            (item: [TreeNode<T>, number]) => -item[1]
         );
 
         this.nearestNeighborN(this.root, point, 0, distances, N);
 
         while (nearestN.length < N && !distances.isEmpty()) {
-            const nearest = distances.pop();
-            if (nearest && nearest.node) {
-                nearestN.push(nearest.node.obj);
-            }
+            const [node, distance] = distances.pop()!;
+            nearestN.push([node.obj, distance]);
         }
 
         return nearestN;
     }
 
+
     private nearestNeighborN(
         currentNode: TreeNode<T> | null,
         target: T,
         depth: number,
-        distances: BinaryHeap<{ node: TreeNode<T>, distance: number }>,
+        distances: BinaryHeap<[TreeNode<T>, number]>,
         N: number
     ): void {
         if (!currentNode) {
             return;
         }
 
+        const dimension = this.dimensions[depth % this.dimensions.length];
         const nodeDistance = this.metric(currentNode.obj, target);
-        const distanceObj = { node: currentNode, distance: nodeDistance };
 
-        if (distances.size() < N) {
-            distances.push(distanceObj);
-        } else if (distances.isEmpty() || nodeDistance < distances.peek()!.distance) {
-            distances.pop();
-            distances.push(distanceObj);
-        }
+        // linearPoint is the projected target on current dim passing the currentNode
+        const linearPoint: T = { ...currentNode.obj };
+        linearPoint[dimension as keyof T] = target[dimension as keyof T];
 
-        const splitDimension = depth % this.dimensions.length;
-        const targetValue = target[this.dimensions[splitDimension]];
-        const nodeValue = currentNode.obj[this.dimensions[splitDimension]];
+        let bestChild: TreeNode<T> | null = null;
+        let otherChild: TreeNode<T> | null = null;
 
-        let closerChild: TreeNode<T> | null, furtherChild: TreeNode<T> | null;
-
-        if (targetValue < nodeValue) {
-            closerChild = currentNode.left;
-            furtherChild = currentNode.right;
+        if (target[dimension as keyof T] < currentNode.obj[dimension as keyof T]) {
+            bestChild = currentNode.left;
+            otherChild = currentNode.right;
         } else {
-            closerChild = currentNode.right;
-            furtherChild = currentNode.left;
+            bestChild = currentNode.right;
+            otherChild = currentNode.left;
         }
 
-        this.nearestNeighborN(closerChild, target, depth + 1, distances, N);
+        this.nearestNeighborN(bestChild, target, depth + 1, distances, N);
 
-        if (distances.size() < N || (distances.peek() && Math.abs(targetValue - nodeValue) < distances.peek()!.distance)) {
-            this.nearestNeighborN(furtherChild, target, depth + 1, distances, N);
+        if (distances.size() < N || nodeDistance < distances.peek()![1]) {
+            distances.push([currentNode, nodeDistance]);
+            if (distances.size() > N) {
+                distances.pop();
+            }
+        }
+
+        // Explore the other half if either the heap is not full or 
+        // the linearPoint-target distance is less than the distance from target to the farthest point in the heap
+        const linearDistance = this.metric(linearPoint, currentNode.obj);
+        if (distances.size() < N || Math.abs(linearDistance) < distances.peek()![1]) {
+            this.nearestNeighborN(otherChild, target, depth + 1, distances, N);
         }
     }
 
