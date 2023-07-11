@@ -6,9 +6,11 @@
   "scripts": {
     "test": "node ./test-dist/test/tests_kdTree.js",
     "pretest": "npm run test:build",
-    "build": "tsc -p ./src/tsconfig.json",
-    "test:build": "tsc -p ./test/tsconfig.json",
-    "start": "node ./dist/kdTree.js"
+    "build": "./node_modules/typescript/bin/tsc -p ./src/tsconfig.json",
+    "test:build": "./node_modules/typescript/bin/tsc -p ./test/tsconfig.json",
+    "start": "node ./dist/kdTree.js",
+    "buildweb": "./node_modules/typescript/bin/tsc -p ./tsconfig.json",
+    "combine": "node ./combine.js"
   },
   "repository": {
     "type": "git",
@@ -25,5 +27,9 @@
   "homepage": "https://github.com/pathaksubrat/data-structures-web#readme",
   "devDependencies": {
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "three": "^0.153.0"
   }
 }

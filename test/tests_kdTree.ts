@@ -52,8 +52,8 @@ const testSuite: TestSuite = {
     },
     "nearestN method": () => {
         const tree = new kdTree(points, haversineDistance, ["lat", "lon"]);
-        const nearest = tree.nearestN({ lat: 51.5, lon: 0 }, 1);
-        if (nearest[0].lat !== 51) throw new Error("Tree did not correctly find nearest point");
+        const nearest = tree.nearest({ lat: 51.5, lon: 0 }, 1);
+        if (nearest[0][0].lat !== 51) throw new Error("Tree did not correctly find nearest point");
     }
 }
 
