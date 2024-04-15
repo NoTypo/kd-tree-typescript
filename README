@@ -1,0 +1,16 @@
+# Constructor
+new kdTree(points: T[], metric: (a: T, b: T) => number, dimensions: string[])
+e.g., new kdTree(particles, distance, ["x", "y"]);
+
+# Insertion
+insert(point: T): void
+
+# Removal
+remove(value: T): void
+
+# Exists
+exists(point: T): boolean
+
+# Nearest Neighbors
+nearestN(point: T, N: number): T[]
+Returns an array of the N nearest neighbors to a given point in the kdTree, according to the metric function.
